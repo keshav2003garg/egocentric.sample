@@ -37,7 +37,7 @@ def steady(on: np.ndarray) -> np.ndarray:
 # One wording for contact events in every clip (004's data names them differently), in the order they happen
 EVENT_WORDS = {"approach": "approach", "contact_start": "touch start", "touch_start": "touch start",
                "grasp_start": "grasp", "grasp": "grasp", "release": "release", "contact_end": "touch end",
-               "touch_end": "touch end", "retreat": "retreat"}
+               "touch_end": "touch end", "retreat": "retreat", "tool_start": "tool on", "tool_end": "tool off"}
 EVENT_ORDER = {w: i for i, w in enumerate(dict.fromkeys(EVENT_WORDS.values()))}
 
 FILES = ("contact.parquet", "contact_events.parquet", "contact_meta.json")
@@ -59,9 +59,11 @@ def hand_parts(clip: Clip, row) -> tuple[str, str]:
     if row.state == "out_of_view":
         return "at the frame edge or out of view", ""
     if row.state == "holding":
+        also = getattr(row, "also_holding", "none")
+        what = f"holding {clip.short(row.held_object)}" + (f" and {clip.short(also)}" if also not in ("none", None) else "")
         if not getattr(row, "hand_visible", True):
-            return f"holding {clip.short(row.held_object)} (hand at the frame edge or out of view)", ""
-        return f"holding {clip.short(row.held_object)}", grip_words(row)
+            return f"{what} (hand at the frame edge or out of view)", ""
+        return what, grip_words(row)
     if row.state == "touching":
         return f"touching {clip.short(row.object)}", ""
     return "free", ""
@@ -158,9 +160,15 @@ def log(clip: Clip) -> dict | None:
     return {"Contact": "Touch, hold, fingers, grip type and role per hand" + (f"; {tools}" if tools else "")}
 
 
+def plural(n, word: str) -> str:
+    return "–" if n is None else f"{n} {word}{'' if n == 1 else 's'}"
+
+
 def detailed_note(clip: Clip, meta: dict, contact: pd.DataFrame) -> str:
     qc = meta["qc"]
     tool_summary = meta.get("tool_summary", {})
+    rim = f", {plural(tool_summary['n_rim_touches'], 'touch')} on its rim" if tool_summary.get("n_rim_touches") else ""
+    rim = rim.replace("touchs", "touches")
     return f"""
 ### Contact and grasp
 For each hand on every frame: what it touches, what it holds, which fingers are in contact, the grip type and the hand's role.
@@ -174,7 +182,7 @@ For each hand on every frame: what it touches, what it holds, which fingers are 
 | Grip type: rules vs. visual labels | {qc['rule_vs_visual_grasp_agreement_hands23']:.0%} agree ({qc['rule_vs_visual_compared']} samples) |
 | Hand surface inside an object | median {qc['penetration_mm_p50_p95'][0]} mm, 95th percentile {qc['penetration_mm_p50_p95'][1]} mm |
 
-**Brush:** {tool_summary.get('n_strokes', '–')} painting strokes ({tool_summary.get('total_painting_time_s', '–')} s), {tool_summary.get('n_dips', '–')} dips in the paint pot.
+**Brush:** {plural(tool_summary.get('n_strokes'), 'painting stroke')} ({tool_summary.get('total_painting_time_s', '–')} s), {plural(tool_summary.get('n_dips'), 'dip')} in the paint pot{rim}.
 
 **Grips:** left hand, power grip on the shoe; right hand, writing tripod (pen grip) on the brush.
 

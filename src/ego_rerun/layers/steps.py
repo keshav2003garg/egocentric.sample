@@ -10,6 +10,15 @@ FILES = ("action_steps.parquet", "task.json")
 STEADY_FRAMES = 10  # the hands part of the "Now" panel shows a change once it has lasted 0.2 s
 
 
+def settle(values: list) -> list:
+    """A value shown only once it has lasted STEADY_FRAMES (or runs to the clip's end); until then the last one stays."""
+    shown = values[:1]
+    for k in range(1, len(values)):
+        lasts = all(v == values[k] for v in values[k:k + STEADY_FRAMES]) or k + STEADY_FRAMES > len(values)
+        shown.append(values[k] if values[k] != shown[-1] and lasts else shown[-1])
+    return shown
+
+
 def at_frame(frame: int):
     rr.set_time("frame", sequence=frame)
     rr.set_time("time", duration=frame / FPS)
@@ -43,23 +52,26 @@ def log(clip: Clip) -> dict | None:
     contact = pd.read_parquet(clip.dir / "contact.parquet") if clip.has("contact.parquet") else None
     tools = tool_states(clip)
     by_hand = {h: contact[contact["hand"] == h].set_index("frame") for h in ("left", "right")} if contact is not None else {}
-    texts = []
+    # each line (each hand, each hand's grip, the tool) settles on its own, so one hand's change never holds back the other's
+    cols = {key: [] for key in ("left", "right", "left_grip", "right_grip", "tool")}
+    tool_name = next(iter(tools.values()))[0] if tools else ""
     for k in range(n):
         step = main[(main["start_frame"] <= k) & (main["end_frame"] >= k)]
         s = step.iloc[0] if not step.empty else main.iloc[-1]
         parts = {h: hand_parts(clip, row_of(t, k)) for h, t in by_hand.items() if k in t.index}
-        what = {h: parts[h][0] if h in parts else s[f"{h}_hand"] for h in ("left", "right")}
-        grips = [f"{h} {parts[h][1]}" for h in ("left", "right") if h in parts and parts[h][1]]
-        lines = [f"- **Left hand:** {what['left']}", f"- **Right hand:** {what['right']}",
+        for h in ("left", "right"):
+            cols[h].append(parts[h][0] if h in parts else s[f"{h}_hand"])
+            cols[f"{h}_grip"].append(parts[h][1] if h in parts else "")
+        cols["tool"].append(tools.get(k, (tool_name, ""))[1])
+    steady = {key: settle(v) for key, v in cols.items()}
+    shown = []
+    for k in range(n):
+        grips = [f"{h} {steady[f'{h}_grip'][k]}" for h in ("left", "right") if steady[f"{h}_grip"][k]]
+        lines = [f"- **Left hand:** {steady['left'][k]}", f"- **Right hand:** {steady['right'][k]}",
                  f"- **Grip:** {' · '.join(grips) if grips else '–'}"]
         if tools:
-            name, phrase = tools.get(k, (next(iter(tools.values()))[0], ""))
-            lines.append(f"- **{name}:** {phrase or '–'}")
-        texts.append("\n".join(lines) + "\n")
-    shown = texts[:1]
-    for k in range(1, n):
-        lasts = all(t == texts[k] for t in texts[k:k + STEADY_FRAMES]) or k + STEADY_FRAMES > n
-        shown.append(texts[k] if texts[k] != shown[-1] and lasts else shown[-1])
+            lines.append(f"- **{tool_name}:** {steady['tool'][k] or '–'}")
+        shown.append("\n".join(lines) + "\n")
     for k in range(n):
         if k == 0 or shown[k] != shown[k - 1]:
             at_frame(k)

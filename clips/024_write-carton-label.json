@@ -1,5 +1,6 @@
 {
   "title": "Write carton label",
   "setting": "Footwear factory",
-  "capture_date": "2026-10-19"
+  "capture_date": "2026-10-19",
+  "path_caveat": "this clip's camera path is the weakest of the set: the GoPro's own sensors don't help here, so the head's in-between frames and the world's level (taken from the carton face) are less certain than in the DJI clips."
 }

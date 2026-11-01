@@ -1,4 +1,8 @@
 {
   "title": "Trace sole line on lasted shoe",
-  "setting": "Footwear factory"
+  "setting": "Footwear factory",
+  "objects": {
+    "shoe_2": "Next shoe",
+    "shoe": "Shoe"
+  }
 }
