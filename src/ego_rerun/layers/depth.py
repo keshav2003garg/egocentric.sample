@@ -7,6 +7,7 @@ import rerun.blueprint as rrb
 from ego_rerun.clip import Clip, note, times
 
 NEAR_M, FAR_M = 0.2, 0.8  # red at 20 cm or closer, blue at 80 cm or farther
+FAR_INDEX = 0.12  # where the far end starts on the TURBO map (below this it runs to near-black)
 # depth_report.json "model" -> what made it; "fast" is the pipeline's 06f_depth_fast.py (DA3METRIC-LARGE, one pass)
 MODELS = {"fast": "Depth Anything 3 Metric-Large, one pass per frame, aligned to the camera path",
           "Depth Anything 3 Metric-Large, one pass per frame":
@@ -18,7 +19,8 @@ FILES = ("depth.npz",)
 def colourise(depth_mm: np.ndarray) -> np.ndarray:
     d = depth_mm.astype(np.float32) / 1000
     t = np.clip((FAR_M - d) / (FAR_M - NEAR_M), 0, 1)
-    rgb = cv2.applyColorMap((t * 255).astype(np.uint8), cv2.COLORMAP_TURBO)
+    # the colour map's dark far end is skipped (it would read as "no depth"): far is plain blue
+    rgb = cv2.applyColorMap(((FAR_INDEX + (1 - FAR_INDEX) * t) * 255).astype(np.uint8), cv2.COLORMAP_TURBO)
     rgb[depth_mm == 0] = 0
     return rgb  # BGR, as cv2.imencode expects
 

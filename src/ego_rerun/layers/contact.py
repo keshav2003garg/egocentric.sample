@@ -37,7 +37,8 @@ def steady(on: np.ndarray) -> np.ndarray:
 # One wording for contact events in every clip (004's data names them differently), in the order they happen
 EVENT_WORDS = {"approach": "approach", "contact_start": "touch start", "touch_start": "touch start",
                "grasp_start": "grasp", "grasp": "grasp", "release": "release", "contact_end": "touch end",
-               "touch_end": "touch end", "retreat": "retreat", "tool_start": "tool on", "tool_end": "tool off"}
+               "touch_end": "touch end", "retreat": "retreat", "handover": "hold moves to", "tool_start": "tool on",
+               "tool_end": "tool off"}
 EVENT_ORDER = {w: i for i, w in enumerate(dict.fromkeys(EVENT_WORDS.values()))}
 
 FILES = ("contact.parquet", "contact_events.parquet", "contact_meta.json")
@@ -79,7 +80,9 @@ def tool_phrase(clip: Clip, state: str) -> str:
     """'in use on primer_cup' -> 'in use on primer cup'."""
     for verb in ("in use on ", "resting on "):
         if state.startswith(verb):
-            return verb + clip.short(state[len(verb):])
+            # a writing tool's "use" is its tip on the surface, ink or not (it rests there between strokes too)
+            shown = "tip on " if verb == "in use on " and clip.notes.get("tip_on_wording") else verb
+            return shown + clip.short(state[len(verb):])
     return state
 
 
@@ -157,7 +160,8 @@ def log(clip: Clip) -> dict | None:
 
     note("notes/contact", (detailed_note if full else visible_surface_note)(clip, meta, contact))
     tools = " and ".join(clip.short(t) for t in meta.get("tool_summary", {})) if not full else "brush strokes and dips"
-    return {"Contact": "Touch, hold, fingers, grip type and role per hand" + (f"; {tools}" if tools else "")}
+    what = "Touch, hold, fingers and grip type per hand" if full else "Touch, hold and fingers per hand"
+    return {"Contact": what + (f"; {tools}" if tools else "")}
 
 
 def plural(n, word: str) -> str:
@@ -171,7 +175,7 @@ def detailed_note(clip: Clip, meta: dict, contact: pd.DataFrame) -> str:
     rim = rim.replace("touchs", "touches")
     return f"""
 ### Contact and grasp
-For each hand on every frame: what it touches, what it holds, which fingers are in contact, the grip type and the hand's role.
+For each hand on every frame: what it touches, what it holds, which fingers are in contact and the grip type.
 
 **How it's found:** the 3D hand surface is measured against a 3D model of each object fitted to every frame, then checked against three independent cues: the hand and object outlines meet in the image, there is no depth gap between them, and the object moves with the hand. A smoothing step removes flicker, and a hand can hold only one object at a time.
 
@@ -205,18 +209,20 @@ def visible_surface_note(clip: Clip, meta: dict, contact: pd.DataFrame) -> str:
     tools = []
     for name, t in meta.get("tool_summary", {}).items():
         uses = ", ".join(f"{clip.short(k)} {v / FPS:.1f} s" for k, v in t["frames_in_use_by_object"].items() if v >= 5)
-        tools.append(f"**{clip.label(name)}:** held for {t['frames_held'] / FPS:.1f} s; in use on {uses or '–'}.")
+        use = ("tip on" if clip.notes.get("tip_on_wording") else "in use on")
+        pauses = " (this includes pauses with the tip resting on it between strokes)" if clip.notes.get("tip_on_wording") else ""
+        tools.append(f"**{clip.label(name)}:** held for {t['frames_held'] / FPS:.1f} s; {use} {uses or '–'}{pauses}.")
     check = meta.get("hand_check", {})
     spot = (f"| Spot check of state and object | {check['state_and_object_correct']:.0%} right on "
             f"{check['hand_frames_scored']} hand-frames |" if check else "")
     roles = f"**In this clip:** {clip.notes['contact_roles']}\n\n" if clip.notes.get("contact_roles") else ""
     return f"""
 ### Contact and grasp
-For each hand on every frame: what it touches, what it holds, which fingers and the palm are in contact, the grip type and the hand's role.
+For each hand on every frame: what it touches, what it holds, and which fingers and the palm are in contact.
 
 **How it's found:** the 3D hand surface is measured against each object's visible surface, taken from its mask and the depth. A hand touches an object when they come within 15 mm where their outlines meet in the image, or when it is partly behind the object (holding it from below). It holds a movable object when it grips it (thumb plus another part, or any three parts touching), or carries it from below as the object moves with the wrist. When the fingers are on a lace or tool, that is named rather than what it lies on. A smoothing step removes flicker. A hand holds one object at a time, except that a hand using a tool can also steady the object it works on ("holding marker and shoe"); that second hold is listed under "Also held". There are no 3D object models in this clip, so contact is judged against the surface the camera sees next to the fingers.
 
-{roles}**Out of view:** where the 3D hand isn't drawn (out of the picture, or too far into its edge), contact isn't judged and the hand shows as out of view. The 3D hand is also left undrawn on short spans where it lands off the real hand; contact there is still judged from the hand data, so those frames aren't counted as out of view. A hold carries on through such a gap, or while a tool is hidden in the fist, when the same object is held on both sides and isn't seen apart from the hand.
+{roles}**Out of view:** where the 3D hand isn't drawn (out of the picture, or too far into its edge), contact isn't judged and the hand shows as out of view. The 3D hand is also left undrawn where it lands off the real hand (see the Hands note); contact there is still judged from the hand data, so those frames aren't counted as out of view. A hold carries on through such a gap, or while a tool is hidden in the fist, when the same object is held on both sides and isn't seen apart from the hand.
 
 | Hand | Frames holding (of {n}) | Held, frames | Also held, frames | Touching, frames | Out of view, frames |
 |---|---|---|---|---|---|
@@ -248,4 +254,4 @@ def tab(clip: Clip):
     # the events log and the note side by side under the plots, so the log gets a full half-height
     below = rrb.Horizontal(log_view("logs/contact_events", "Contact events"),
                            rrb.TextDocumentView(origin="notes/contact", name="About"), column_shares=[1, 1])
-    return rrb.Vertical(*views, below, row_shares=[1] * len(views) + [len(views) + 1], name="Contact")
+    return rrb.Vertical(*views, below, row_shares=[1] * len(views) + [2], name="Contact")

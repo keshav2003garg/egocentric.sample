@@ -19,6 +19,7 @@ ON_SCENE_MIN = 0.4  # a 3D hand with less of its surface than this on the hand o
 ON_HAND_MIN = 0.35  # ...nor one clearly in view (outline >= BIG_HAND_PX) with less than this on its own outline
 BIG_HAND_PX = 3000  # half-res px
 OFF_SCENE_PAD = 2  # ...nor the frames this close to it
+MIN_DRAWN_RUN = 6  # frames: a shorter drawn run between hidden frames isn't drawn
 SMOOTH_HALF = 4  # hands.parquet is smoothed over 9 frames, so a bad frame pulls up to 4 neighbours off with it
 
 FILES = ("hands.parquet", "hands_meta.json")
@@ -118,6 +119,11 @@ def log(clip: Clip) -> dict | None:
         t_s = everything["frame"].to_numpy() / FPS
         for a, b in clip.notes.get("hide_hand", {}).get(hand, []):
             present &= ~((t_s >= a) & (t_s <= b))
+        # a hand drawn for only a few frames between hidden ones reads as a pop: leave it out too
+        edges = np.flatnonzero(np.diff(np.r_[0, present.astype(int), 0]))
+        for a, b in zip(edges[::2], edges[1::2]):
+            if b - a < MIN_DRAWN_RUN:
+                present[a:b] = False
         t = everything[present]
         frames = t["frame"].to_numpy()
         n = len(frames)
@@ -200,9 +206,10 @@ def log(clip: Clip) -> dict | None:
                 "is out of the picture, too far into its edge to be placed against measured depth, or its 3D fit lands off "
                 "the hand in the picture, and isn't drawn")
     hidden_note = (f"\n\n**Not drawn:** {clip.notes['hide_hand_note']}" if clip.notes.get("hide_hand_note") else "")
+    hidden_note += f"\n\n**Re-placed:** {clip.notes['refit_note']}" if clip.notes.get("refit_note") else ""
     note("notes/hands", f"""
 ### Hands
-NVIDIA EgoHand-v1 on the fisheye video, with hand boxes from the SAM 3.1 masks. Each hand's distance comes from the hand model and is moved onto the measured depth where the two disagree by more than 2.5 cm (and at the image edge); it is then put in the room with the camera path and smoothed over 9 frames (0.18 s). Seen from the side, fingertips pressed flat on a surface can sit 2–4 cm into it, because the finger tilt comes from the hand model, not from depth.
+NVIDIA EgoHand-v1 on the fisheye video, with hand boxes from the SAM 3.1 masks. Each hand's distance comes from the hand model and is moved onto the measured depth where the two disagree by more than 2.5 cm (and at the image edge); it is then put in the room with the camera path and smoothed over 9 frames (0.18 s). Seen from the side, parts of a hand resting on a surface (curled fingers, the palm's edge) can sit 2–5 cm into it, because the finger pose and tilt come from the hand model, not from depth.
 
 25 joints per hand (the standard 21 keypoints are also saved), in metres, {coverage}.
 

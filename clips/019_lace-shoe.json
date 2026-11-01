@@ -7,5 +7,6 @@
     "lace": "Lace",
     "shoe": "Shoe"
   },
-  "contact_roles": "only the right hand threads the lace in this clip, so the left hand, wrapped round the shoe, holds the shoe even where its fingertips rest on the lace."
+  "contact_roles": "the right hand threads the lace: it keeps the lace between pulls while it feeds the tip at an eyelet (the tip in its fingers isn't in the lace mask) or briefly leaves the picture. The left hand holds the shoe throughout, even where its fingertips rest on the lace. In the first 1.9 s the left hand's 3D fit sits 3–10 cm off the shoe while its fingers are in the shoe opening, so it reads as free there.",
+  "masks_caveat": "for the first 1.3 s the lace being worked is bunched between the hands and isn't outlined (the tracker had picked the whole lace pile there). The loose lace ends and the tip in the fingers aren't outlined either."
 }

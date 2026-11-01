@@ -1,5 +1,6 @@
 {
   "title": "Press sole onto shoe",
   "setting": "Footwear factory",
-  "contact_roles": "once the sole is pressed onto the shoe, a grip that stays put passes from sole to shoe with no release in between."
+  "contact_roles": "the left grip doesn't change at about 3 s; only the surface under the fingers turns from sole to shoe upper as the shoe rolls, so the hold passes from sole to shoe in one \"hold moves to\" event.",
+  "surface": "ledge"
 }

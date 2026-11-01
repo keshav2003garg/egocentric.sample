@@ -47,7 +47,11 @@ def log(clip: Clip) -> dict | None:
 
 | Object | Frames visible (of {labels.shape[0]}) | Median confidence |
 |---|---|---|
-""" + "\n".join(rows))
+""" + "\n".join(rows) + """
+
+"Confidence" is the tracker's own score that it is still following the object. It stays high even where the outline
+is too small or slips onto an edge, so it doesn't measure how well the outline fits.""" + (
+        f"\n\n**In this clip:** {clip.notes['masks_caveat']}" if clip.notes.get("masks_caveat") else ""))
     objects = len([n for n in order if not n.endswith("_hand")])
     return {"Masks": f"Per-pixel masks for both hands and {objects} object{'s' if objects != 1 else ''}"}
 

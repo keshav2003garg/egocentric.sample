@@ -10,12 +10,5 @@
     "shoe": "Shoe"
   },
   "capture_date": "2026-10-20",
-  "hide_hand": {
-    "right": [
-      [2.48, 4.1],
-      [4.32, 5.12],
-      [6.3, 8.76]
-    ]
-  },
-  "hide_hand_note": "while the right hand wraps the brush overhand (2.5–4.1, 4.3–5.1 and 6.3–8.8 s) its fingers are hidden under the handle and the hand model can't read the grip, so its 3D hand and keypoints aren't shown there; the wrist path and contact are still recorded in the data."
+  "refit_note": "while the right hand wraps the brush (2.4–8.8 s) its fingers are mostly hidden by the handle and the hand model misreads the grip, so there the 3D hand is the grip from a clearly seen frame (0.8 s) placed on the brush handle's 3D axis, turned and slid to match the hand's outline and depth. Its finger pose is that frame's, not measured on each frame."
 }

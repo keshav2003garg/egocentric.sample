@@ -2,5 +2,6 @@
   "title": "Insert insole into shoe",
   "setting": "Footwear factory, seated on the floor",
   "surface": "floor",
-  "contact_roles": "only the left hand holds the shoe in this clip, so the right hand pressing the insole into it reads as touching; a pressed-flat insole is touched, not held."
+  "contact_roles": "the right hand holds the insole while its thumb pinches it (carrying it and feeding it in), and touches it once it presses it flat into the shoe with the fingers and palm; only the left hand holds the shoe.",
+  "masks_caveat": "once the insole is pressed into the dark shoe (about 2.4 s on), its outline shrinks to a strip along the shoe's inner wall, though the insole lies flat under the hand."
 }

@@ -66,12 +66,15 @@ def log(clip: Clip) -> dict | None:
     placed = (f"{report['frames_solved'].split(' of ')[0]} keyframes (every {report['keyframe_step']}th frame), all "
               "placed; the frames between follow the camera's motion sensor" if "keyframe_step" in report
               else report["frames_solved"])
-    level = ("levelled from the work surface fitted in the depth (this GoPro clip's own gravity reading came out tilted)"
-             if "levelled_from_work_surface" in report else "levelled to gravity from the accelerometer")
+    fitted = report.get("levelled_from_work_surface", {})
+    level = (f"levelled from the {clip.surface if fitted.get('surface_mask') else 'work surface'} fitted in the depth "
+             "(this GoPro clip's own gravity reading came out tilted)" if fitted else "levelled to gravity from the accelerometer")
     sensor_note = ("\n\nThe GoPro's own orientation track drifts and isn't tied to gravity, so the comparison with it "
                    "mostly measures that track, not the path." if "sensor_comparison_note" in report else "")
     if "path_caveat" in clip.notes:
         sensor_note += f"\n\n**Note:** {clip.notes['path_caveat']}"
+    lo, hi = frames_df["iso"].min(), frames_df["iso"].max()
+    iso = f"{lo:.0f}" if lo == hi else f"{lo:.0f}–{hi:.0f}"
     note("notes/camera", f"""
 ### Camera
 **{info['camera']}**, head-mounted, {lens['width']}×{lens['height']} at {info['fps']:g} fps, stabilisation {info['stabilisation']}.
@@ -80,7 +83,7 @@ def log(clip: Clip) -> dict | None:
 |---|---|
 | Lens | OpenCV fisheye, f = {lens['fx']:.1f} px, centre ({lens['cx']:.0f}, {lens['cy']:.0f}) |
 | Rolling shutter | {info['rolling_shutter_readout_ms']:.2f} ms readout |
-| Shutter / ISO | 1/{round(1 / frames_df['exposure_s'].median())} s, ISO {frames_df['iso'].min():.0f}–{frames_df['iso'].max():.0f} |
+| Shutter / ISO | 1/{round(1 / frames_df['exposure_s'].median())} s, ISO {iso} |
 | Motion sensor | orientation at {info['imu_rate_hz']} Hz, accelerometer per frame |
 
 ### Camera path
