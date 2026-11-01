@@ -1,0 +1,13 @@
+{
+  "title": "Brush primer on lasted shoe",
+  "setting": "Footwear factory",
+  "objects": {
+    "left_hand": "Left hand",
+    "right_hand": "Right hand",
+    "primer_cup": "Primer cup",
+    "lid": "Primer cup lid",
+    "brush": "Brush",
+    "shoe": "Shoe"
+  },
+  "capture_date": "2026-10-20"
+}

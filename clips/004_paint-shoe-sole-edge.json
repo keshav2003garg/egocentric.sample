@@ -1,0 +1,28 @@
+{
+  "title": "Paint shoe sole edge",
+  "task": "Paint the sole edge of a pair of shoes. The left hand holds one shoe at a time; the right hand paints along the sole edge with a fine brush and re-dips it in the paint pot.",
+  "setting": "Footwear factory, seated at a worktable",
+  "capture_date": "2026-10-26",
+  "objects": {
+    "left_hand": "Left hand",
+    "right_hand": "Right hand",
+    "brush": "Paint brush",
+    "shoe_1": "Shoe 1 (painted first)",
+    "shoe_2": "Shoe 2 (painted second)",
+    "paint_pot": "Paint pot",
+    "nippers": "Thread nippers"
+  },
+  "depth": {
+    "model": "Depth Anything 3 Metric-Large, aligned to the camera path",
+    "coverage_pct": 100.0,
+    "error_vs_sfm_points_pct": 2.58,
+    "points_within_5pct": 71.0,
+    "error_by_distance_from_centre_pct": {
+      "0–300 px": 2.97,
+      "300–600 px": 2.11,
+      "600–900 px": 3.07,
+      "900–1200 px": 4.12
+    },
+    "flicker_pct": 1.01
+  }
+}
