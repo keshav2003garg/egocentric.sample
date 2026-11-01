@@ -1,5 +1,6 @@
 {
   "title": "Insert insole into shoe",
   "setting": "Footwear factory, seated on the floor",
-  "surface": "floor"
+  "surface": "floor",
+  "contact_roles": "only the left hand holds the shoe in this clip, so the right hand pressing the insole into it reads as touching; a pressed-flat insole is touched, not held."
 }

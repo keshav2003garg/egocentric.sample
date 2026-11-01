@@ -35,9 +35,10 @@ def stats(clip: Clip) -> dict:
         extra += (" The overall scale was checked against adult hand size and corrected by "
                   f"×{r['metric_scale_corrected_by_hand_size']['factor']:.2f}.")
     if "steady_scale" in r:
-        extra += (" Fast frame-to-frame changes in the depth scale were removed by comparing the same scene points "
-                  f"between neighbouring frames ({r['steady_scale']['jump_rms_pct_before']}% → "
-                  f"{r['steady_scale']['jump_rms_pct_after']}% per frame).")
+        extra += (" Jumps in the overall depth scale between neighbouring frames were removed by comparing the same "
+                  f"still scene points (scale jump {r['steady_scale']['jump_rms_pct_before']}% → "
+                  f"{r['steady_scale']['jump_rms_pct_after']}% per frame). The flicker figure in the table is a "
+                  "different, per-pixel measure, and also counts hands and objects that really move.")
     bands = r["error_after_by_distance_from_centre_pct"]
     return {
         "model": MODELS[r["model"]],
@@ -68,7 +69,7 @@ def log(clip: Clip) -> dict | None:
 | Pixels with depth | {s['coverage_pct']}% |
 | Error vs structure-from-motion points | {s['error_vs_sfm_points_pct']}% (median) |
 | Points within 5% | {s['points_within_5pct']}% |
-| Frame-to-frame flicker | {s['flicker_pct']}% |
+| Frame-to-frame flicker (per pixel) | {s['flicker_pct']}% |
 
 | Distance from image centre | Error |
 |---|---|

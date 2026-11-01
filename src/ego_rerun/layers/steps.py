@@ -4,7 +4,7 @@ import rerun as rr
 import rerun.blueprint as rrb
 
 from ego_rerun.clip import FPS, Clip, log_view, note
-from ego_rerun.layers.contact import hand_parts, tool_states
+from ego_rerun.layers.contact import detailed, hand_parts, tool_states
 
 FILES = ("action_steps.parquet", "task.json")
 STEADY_FRAMES = 10  # the hands part of the "Now" panel shows a change once it has lasted 0.2 s
@@ -64,11 +64,14 @@ def log(clip: Clip) -> dict | None:
             cols[f"{h}_grip"].append(parts[h][1] if h in parts else "")
         cols["tool"].append(tools.get(k, (tool_name, ""))[1])
     steady = {key: settle(v) for key, v in cols.items()}
+    # grip words only where they come from the detailed per-frame grip labels (the coarse rule elsewhere reads too flat)
+    show_grip = contact is not None and detailed(clip)
     shown = []
     for k in range(n):
         grips = [f"{h} {steady[f'{h}_grip'][k]}" for h in ("left", "right") if steady[f"{h}_grip"][k]]
-        lines = [f"- **Left hand:** {steady['left'][k]}", f"- **Right hand:** {steady['right'][k]}",
-                 f"- **Grip:** {' · '.join(grips) if grips else '–'}"]
+        lines = [f"- **Left hand:** {steady['left'][k]}", f"- **Right hand:** {steady['right'][k]}"]
+        if show_grip:
+            lines.append(f"- **Grip:** {' · '.join(grips) if grips else '–'}")
         if tools:
             lines.append(f"- **{tool_name}:** {steady['tool'][k] or '–'}")
         shown.append("\n".join(lines) + "\n")
@@ -81,7 +84,7 @@ def log(clip: Clip) -> dict | None:
     rows = "\n".join(f"| {int(s.step_id) + 1} | {s.start_s:.2f}–{s.end_s:.2f} s | {s['name'][0].upper()}{s['name'][1:]} |"
                      for _, s in main.iterrows())
     repeats = {k: v for k, v in task.get("counts", {}).items() if v > 1}
-    counts = " **Counts:** " + ", ".join(f"{k.replace('_', ' ')} {v}" for k, v in repeats.items()) + "." if repeats else ""
+    counts = " **Counts:** " + ", ".join(f"{k.replace('_', ' ')} ×{v}" for k, v in repeats.items()) + "." if repeats else ""
     finer = (f"{len(sub)} finer sub-step{'s mark' if len(sub) != 1 else ' marks'} repeated actions within the steps."
              if len(sub) else "")
     lo, hi = (int(v) for v in pd.concat([main, sub])["boundary_uncertainty_frames"].agg(["min", "max"]))

@@ -200,7 +200,8 @@ def visible_surface_note(clip: Clip, meta: dict, contact: pd.DataFrame) -> str:
         h = qc["per_hand"][hand]
         held = ", ".join(f"{clip.short(k)} {v}" for k, v in h["held"].items() if v) or "–"
         touched = ", ".join(f"{clip.short(k)} {v}" for k, v in h["frames_touching_by_object"].items() if v) or "–"
-        rows.append(f"| {hand.capitalize()} | {h['frames_holding']} | {held} | {touched} | {h.get('frames_out_of_view', 0)} |")
+        also = ", ".join(f"{clip.short(k)} {v}" for k, v in h.get("also_held", {}).items() if v) or "–"
+        rows.append(f"| {hand.capitalize()} | {h['frames_holding']} | {held} | {also} | {touched} | {h.get('frames_out_of_view', 0)} |")
     tools = []
     for name, t in meta.get("tool_summary", {}).items():
         uses = ", ".join(f"{clip.short(k)} {v / FPS:.1f} s" for k, v in t["frames_in_use_by_object"].items() if v >= 5)
@@ -208,16 +209,17 @@ def visible_surface_note(clip: Clip, meta: dict, contact: pd.DataFrame) -> str:
     check = meta.get("hand_check", {})
     spot = (f"| Spot check of state and object | {check['state_and_object_correct']:.0%} right on "
             f"{check['hand_frames_scored']} hand-frames |" if check else "")
+    roles = f"**In this clip:** {clip.notes['contact_roles']}\n\n" if clip.notes.get("contact_roles") else ""
     return f"""
 ### Contact and grasp
 For each hand on every frame: what it touches, what it holds, which fingers and the palm are in contact, the grip type and the hand's role.
 
-**How it's found:** the 3D hand surface is measured against each object's visible surface, taken from its mask and the depth. A hand touches an object when they come within 15 mm where their outlines meet in the image, or when it is partly behind the object (holding it from below). It holds a movable object when it grips it (thumb plus another part, or any three parts touching), or carries it from below as the object moves with the wrist. When the fingers are on a lace or tool, that is named rather than what it lies on. A smoothing step removes flicker, and a hand holds only one object at a time. There are no 3D object models in this clip, so contact is judged against the surface the camera sees next to the fingers.
+**How it's found:** the 3D hand surface is measured against each object's visible surface, taken from its mask and the depth. A hand touches an object when they come within 15 mm where their outlines meet in the image, or when it is partly behind the object (holding it from below). It holds a movable object when it grips it (thumb plus another part, or any three parts touching), or carries it from below as the object moves with the wrist. When the fingers are on a lace or tool, that is named rather than what it lies on. A smoothing step removes flicker. A hand holds one object at a time, except that a hand using a tool can also steady the object it works on ("holding marker and shoe"); that second hold is listed under "Also held". There are no 3D object models in this clip, so contact is judged against the surface the camera sees next to the fingers.
 
-**Out of view:** where the 3D hand isn't drawn (out of the picture, or too far into its edge), contact isn't judged and the hand shows as out of view. A hold carries on through such a gap, or while a tool is hidden in the fist, when the same object is held on both sides and isn't seen apart from the hand.
+{roles}**Out of view:** where the 3D hand isn't drawn (out of the picture, or too far into its edge), contact isn't judged and the hand shows as out of view. The 3D hand is also left undrawn on short spans where it lands off the real hand; contact there is still judged from the hand data, so those frames aren't counted as out of view. A hold carries on through such a gap, or while a tool is hidden in the fist, when the same object is held on both sides and isn't seen apart from the hand.
 
-| Hand | Frames holding (of {n}) | Held, frames | Touching, frames | Out of view, frames |
-|---|---|---|---|---|
+| Hand | Frames holding (of {n}) | Held, frames | Also held, frames | Touching, frames | Out of view, frames |
+|---|---|---|---|---|---|
 {chr(10).join(rows)}
 
 | Check | Result |
@@ -243,6 +245,7 @@ def tab(clip: Clip):
         name = ("Brush: 0 idle · 1 approach · 2 dip · 3 painting" if detailed(clip)
                 else "Tool: 0 not held · 1 held · 2 in use")
         views.append(rrb.TimeSeriesView(origin="plots/contact/tool", name=name))
-    views += [log_view("logs/contact_events", "Contact events"),
-              rrb.TextDocumentView(origin="notes/contact", name="About")]
-    return rrb.Vertical(*views, row_shares=[2] * (len(views) - 1) + [4], name="Contact")
+    # the events log and the note side by side under the plots, so the log gets a full half-height
+    below = rrb.Horizontal(log_view("logs/contact_events", "Contact events"),
+                           rrb.TextDocumentView(origin="notes/contact", name="About"), column_shares=[1, 1])
+    return rrb.Vertical(*views, below, row_shares=[1] * len(views) + [len(views) + 1], name="Contact")
