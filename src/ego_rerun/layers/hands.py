@@ -14,6 +14,7 @@ from ego_rerun.clip import FPS, HAND_COLOURS, HIDDEN, Clip, note, plot, times
 KP21_BONES = [(0, 1), (1, 2), (2, 3), (3, 4), (0, 5), (5, 6), (6, 7), (7, 8), (9, 10), (10, 11), (11, 12),
               (13, 14), (14, 15), (15, 16), (0, 17), (17, 18), (18, 19), (19, 20), (5, 9), (9, 13), (13, 17)]
 SURFACE_VOXEL_M = 0.006
+SURFACE_ALPHA = 140  # of 255: the hand surface is see-through, so the skeleton and what the hand holds show through it
 TIPS = [4, 9, 14, 19, 24]  # fingertips in the 25 joints: the frame where they're furthest apart sets the web surface
 ON_SCENE_MIN = 0.4  # a 3D hand with less of its surface than this on the hand or objects in the picture isn't drawn
 ON_HAND_MIN = 0.35  # ...nor one clearly in view (outline >= BIG_HAND_PX) with less than this on its own outline
@@ -142,7 +143,7 @@ def log(clip: Clip) -> dict | None:
                                        SURFACE_VOXEL_M)
                 verts = (mean @ verts.transpose(1, 0, 2).reshape(verts.shape[1], -1)).reshape(-1, n, 3).transpose(1, 0, 2)
                 verts = verts.astype(np.float32)
-            rr.log(f"world/hands/{hand}/surface", rr.Mesh3D.from_fields(albedo_factor=[*colour, 255]), static=True)
+            rr.log(f"world/hands/{hand}/surface", rr.Mesh3D.from_fields(albedo_factor=[*colour, SURFACE_ALPHA]), static=True)
             for start in run_starts(present, everything["frame"].to_numpy()):
                 at(start)
                 rr.log(f"world/hands/{hand}/surface", rr.Mesh3D.from_fields(triangle_indices=faces))
