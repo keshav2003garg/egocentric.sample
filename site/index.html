@@ -530,7 +530,7 @@
         window._handle = handle;
 
         // The site's episodes are listed in episodes.json; the bar at the top picks one (?episode=<id>, else the
-        // first). The page fetches that episode itself, so the request carries the site's sign-in, and hands the
+        // first). The page fetches that episode itself, so the request carries Cloudflare's bot-check cookie, and hands the
         // bytes to the viewer (the viewer's own fetch doesn't). Progress and errors show in a box above the viewer.
         if (!new URLSearchParams(window.location.search).getAll("url").length) {
           const box = document.createElement("div");

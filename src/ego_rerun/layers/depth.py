@@ -8,10 +8,10 @@ from ego_rerun.clip import Clip, note, times
 
 NEAR_M, FAR_M = 0.2, 0.8  # red at 20 cm or closer, blue at 80 cm or farther
 FAR_INDEX = 0.12  # where the far end starts on the TURBO map (below this it runs to near-black)
-# depth_report.json "model" -> what made it; "fast" is the pipeline's 06f_depth_fast.py (DA3METRIC-LARGE, one pass)
-MODELS = {"fast": "Depth Anything 3 Metric-Large, one pass per frame, aligned to the camera path",
-          "Depth Anything 3 Metric-Large, one pass per frame":
-              "Depth Anything 3 Metric-Large, one pass per frame, aligned to the camera path"}
+# depth_report.json "model" -> how the note describes it (the model itself isn't named to buyers);
+# "fast" is the pipeline's 06f_depth_fast.py
+MODELS = {"fast": "Metric depth, one pass per frame, aligned to the camera path",
+          "Depth Anything 3 Metric-Large, one pass per frame": "Metric depth, one pass per frame, aligned to the camera path"}
 
 FILES = ("depth.npz",)
 
@@ -32,7 +32,7 @@ def stats(clip: Clip) -> dict:
     r = clip.json("depth_report.json")
     if r["model"] not in MODELS:
         raise SystemExit(f"{clip.name}: unknown depth model {r['model']!r} in depth_report.json; add it to depth.MODELS")
-    extra = "The far fisheye corners are outside the model's view and have no depth."
+    extra = "The far fisheye corners have no depth."
     if "metric_scale_corrected_by_hand_size" in r:
         extra += (" The overall scale was checked against adult hand size and corrected by "
                   f"×{r['metric_scale_corrected_by_hand_size']['factor']:.2f}.")
@@ -57,7 +57,7 @@ def log(clip: Clip) -> dict | None:
     if not clip.has(*FILES):
         return None
     depth = np.load(clip.dir / "depth.npz")["depth_mm"]
-    size, quality = ((depth.shape[2] // 2, depth.shape[1] // 2), 80) if clip.web else (None, 88)
+    size, quality = ((depth.shape[2] // 2, depth.shape[1] // 2), 70) if clip.web else (None, 88)
     blobs = [cv2.imencode(".jpg", colourise(cv2.resize(d, size, interpolation=cv2.INTER_NEAREST) if size else d),
                           [cv2.IMWRITE_JPEG_QUALITY, quality])[1].tobytes() for d in depth]
     rr.send_columns("depth", indexes=times(np.arange(len(depth))),

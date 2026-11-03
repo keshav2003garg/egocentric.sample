@@ -1,4 +1,4 @@
-"""The sample.zygot.ai site: an S3 bucket behind CloudFront, password-protected by a CloudFront Function. The page
+"""The sample.zygot.ai site: an S3 bucket behind CloudFront, with Cloudflare's bot check in front. The page
 lists every episode in episodes.json and opens one at a time; publishing clips adds or replaces their entries.
 
 `preview` lays the same site out locally and serves it, so it can be checked before publishing.
@@ -31,6 +31,7 @@ import rerun as rr
 ROOT = Path(__file__).resolve().parents[2]
 SITE = "https://sample.zygot.ai"
 VIEWER = f"rerun-{rr.__version__}"
+FIRST = "004_paint-shoe-sole-edge"  # the hero episode: listed first and opened by default
 PREVIEW_PORT = 4200
 
 
@@ -87,7 +88,7 @@ def entry(clip_name: str, title: str) -> dict:
 
 def merged(episodes: list, new: list) -> list:
     ids = {e["id"] for e in new}
-    return sorted([e for e in episodes if e["id"] not in ids] + new, key=lambda e: e["id"])
+    return sorted([e for e in episodes if e["id"] not in ids] + new, key=lambda e: (e["id"] != FIRST, e["id"]))
 
 
 def page() -> str:

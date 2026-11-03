@@ -117,7 +117,7 @@ def log(clip: Clip) -> dict | None:
 
 **Outcome:** {task.get('outcome', '–')}.
 
-Step start and end frames come from the contact, tool and 3D hand data where they show the change, otherwise from keyframes; each is accurate to {spread} frames ({spread_s} s). Step names and descriptions are written by a vision-language model from keyframes and checked against those timings.
+Step start and end frames come from the contact, tool and 3D hand data where they show the change, otherwise from keyframes; each is accurate to {spread} frames ({spread_s} s). Step names and descriptions are written from keyframes and checked against those timings.
 """)
     and_sub = f" and {len(sub)} sub-step{'s' if len(sub) != 1 else ''}" if len(sub) else ""
     return {"Action steps": f"{len(main)} timed steps{and_sub} with descriptions"}

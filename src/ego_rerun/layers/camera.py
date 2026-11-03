@@ -69,7 +69,7 @@ def log(clip: Clip) -> dict | None:
     fitted = report.get("levelled_from_work_surface", {})
     level = (f"levelled from the {clip.surface if fitted.get('surface_mask') else 'work surface'} fitted in the depth"
              if fitted else "levelled to gravity from the accelerometer")
-    sensor_note = ("\n\nThe GoPro's own orientation track drifts and isn't tied to gravity, so the comparison with it "
+    sensor_note = ("\n\nThe camera's own orientation track drifts and isn't tied to gravity, so the comparison with it "
                    "mostly measures that track, not the path." if "sensor_comparison_note" in report else "")
     if "path_caveat" in clip.notes:
         sensor_note += f"\n\n**Note:** {clip.notes['path_caveat']}"
@@ -87,7 +87,7 @@ def log(clip: Clip) -> dict | None:
 | Motion sensor | orientation at {info['imu_rate_hz']} Hz, accelerometer per frame |
 
 ### Camera path
-Structure from motion (COLMAP, SIFT) with the camera's own lens held fixed; scaled to metres from metric depth; {level}.
+Structure from motion with the camera's own lens held fixed; scaled to metres from metric depth; {level}.
 
 | | |
 |---|---|

@@ -13,7 +13,7 @@
     "nippers": "Thread nippers"
   },
   "depth": {
-    "model": "Depth Anything 3 Metric-Large, aligned to the camera path",
+    "model": "Metric depth, aligned to the camera path",
     "coverage_pct": 100.0,
     "error_vs_sfm_points_pct": 2.58,
     "points_within_5pct": 71.0,

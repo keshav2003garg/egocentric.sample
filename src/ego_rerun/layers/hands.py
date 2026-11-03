@@ -13,7 +13,7 @@ from ego_rerun.clip import FPS, HAND_COLOURS, HIDDEN, Clip, note, plot, times
 # Standard 21-keypoint connections: thumb and four fingers from the wrist, plus the knuckle line
 KP21_BONES = [(0, 1), (1, 2), (2, 3), (3, 4), (0, 5), (5, 6), (6, 7), (7, 8), (9, 10), (10, 11), (11, 12),
               (13, 14), (14, 15), (15, 16), (0, 17), (17, 18), (18, 19), (19, 20), (5, 9), (9, 13), (13, 17)]
-SURFACE_VOXEL_M = 0.006
+SURFACE_VOXEL_M = 0.008
 SURFACE_ALPHA = 140  # of 255: the hand surface is see-through, so the skeleton and what the hand holds show through it
 TIPS = [4, 9, 14, 19, 24]  # fingertips in the 25 joints: the frame where they're furthest apart sets the web surface
 ON_SCENE_MIN = 0.4  # a 3D hand with less of its surface than this on the hand or objects in the picture isn't drawn
@@ -212,7 +212,7 @@ def log(clip: Clip) -> dict | None:
     hidden_note += f"\n\n**Re-placed:** {clip.notes['refit_note']}" if clip.notes.get("refit_note") else ""
     note("notes/hands", f"""
 ### Hands
-NVIDIA EgoHand-v1 on the fisheye video, with hand boxes from the SAM 3.1 masks. Each hand's distance comes from the hand model and is moved onto the measured depth where the two disagree by more than 2.5 cm (and at the image edge); it is then put in the room with the camera path and smoothed over 9 frames (0.18 s). Seen from the side, parts of a hand resting on a surface (curled fingers, the palm's edge) can sit 2–5 cm into it, because the finger pose and tilt come from the hand model, not from depth.
+Fitted on the fisheye video, guided by the hand masks. Each hand's distance comes from the hand model and is moved onto the measured depth where the two disagree by more than 2.5 cm (and at the image edge); it is then put in the room with the camera path and smoothed over 9 frames (0.18 s). Seen from the side, parts of a hand resting on a surface (curled fingers, the palm's edge) can sit 2–5 cm into it, because the finger pose and tilt come from the hand model, not from depth.
 
 25 joints per hand (the standard 21 keypoints are also saved), in metres, {coverage}.
 

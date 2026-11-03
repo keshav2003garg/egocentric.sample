@@ -14,6 +14,8 @@ def log(clip: Clip) -> dict | None:
         return None
     z = np.load(clip.dir / "masks.npz")
     labels, order = z["labels"], [str(n) for n in z["names"]]
+    if clip.web:
+        labels = labels[:, ::2, ::2]  # half the grid: a quarter of the memory in the browser
     table = pd.read_parquet(clip.dir / "masks.parquet")
     scale = clip.lens["width"] / labels.shape[2]
 
@@ -36,10 +38,10 @@ def log(clip: Clip) -> dict | None:
         rows.append(f"| {clip.label(n)} | {seen} | {t.loc[t['visible'], 'score'].median():.2f} |")
 
     if clip.has("masks_report.json"):
-        how = ("SAM 3.1, found by a text prompt per object (picks checked by eye), then followed forward and backward "
-               "through the clip by its video memory; an object that is lost is looked for again every 10 frames.")
+        how = ("Found by a text prompt per object (picks checked by eye), then followed forward and backward "
+               "through the clip; an object that is lost is looked for again every 10 frames.")
     else:
-        how = ("SAM 3.1, prompted once per object by text, then followed through the clip by its video memory. Objects "
+        how = ("Found once per object by a text prompt, then followed through the clip. Objects "
                "are never re-detected, so the two identical shoes keep their identities.")
     note("notes/masks", f"""
 ### Masks

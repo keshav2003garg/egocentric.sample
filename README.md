@@ -62,7 +62,7 @@ To add a layer, add a module with `log(clip)` and `tab(clip)` and list it in `la
 
 ## Publishing to sample.zygot.ai
 
-This repo is the source of sample.zygot.ai (password-protected, AWS account 311353783217). The site's bucket, CloudFront and `sample.zygot.ai` address are an SST stack (`sst.config.ts`); the keys, the Cloudflare token and the site password are in `.env.production.local` (git-ignored).
+This repo is the source of sample.zygot.ai (AWS account 311353783217). The site's bucket, CloudFront and `sample.zygot.ai` address are an SST stack (`sst.config.ts`); the keys and the Cloudflare token are in `.env.production.local` (git-ignored). The DNS record is proxied by Cloudflare, and a custom security rule on the zygot.ai zone ("Bot check on sample.zygot.ai", Managed Challenge) checks visitors are human before the site loads.
 
 ```bash
 pnpm install && pnpm deploy:prod               # make or update the stack (bucket, CloudFront, domain)
@@ -71,10 +71,12 @@ pnpm install && pnpm deploy:prod               # make or update the stack (bucke
 ```
 
 `pnpm remove:prod` deletes the stack. `publish` signs in with the keys in `.env.production.local` and finds the bucket and CloudFront ID in `.sst/outputs.json`, which the deploy writes. It:
-- builds a smaller copy of each clip (`ego-rerun web`): re-encoded video, half-size depth images, lighter hand surfaces;
+- builds a smaller copy of each clip (`ego-rerun web`): re-encoded video, half-size depth images and masks, lighter hand surfaces;
 - uploads each to `episodes/<clip>.rrd` and adds or replaces its entry in `episodes.json` (other episodes stay);
 - uploads the web viewer from the installed Rerun to `rerun-<version>/`, so the viewer always matches the files;
 - uploads `index.html` from `site/index.html`, then clears the CloudFront cache.
+
+The paint-sole-edge episode (`FIRST` in `publish.py`) is listed first and opens by default; the rest follow by clip number.
 
 The page has an episode menu at the top and opens one episode at a time (`?episode=<clip>`, else the first), so a visitor only downloads the episode they look at, and each episode has its own link.
 
