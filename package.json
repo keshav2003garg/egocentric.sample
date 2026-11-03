@@ -1,0 +1,16 @@
+{
+  "name": "zygot-sample",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy:prod": "node --env-file=.env.production.local scripts/sst.mjs deploy --stage production",
+    "remove:prod": "node --env-file=.env.production.local scripts/sst.mjs remove --stage production"
+  },
+  "dependencies": {
+    "sst": "4.17.2"
+  },
+  "packageManager": "pnpm@12.5.1",
+  "engines": {
+    "node": ">=24"
+  }
+}

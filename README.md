@@ -62,14 +62,15 @@ To add a layer, add a module with `log(clip)` and `tab(clip)` and list it in `la
 
 ## Publishing to sample.zygot.ai
 
-This repo is the source of sample.zygot.ai (password-protected, control account 028607042266).
+This repo is the source of sample.zygot.ai (password-protected, AWS account 311353783217). The site's bucket, CloudFront and `sample.zygot.ai` address are an SST stack (`sst.config.ts`); the keys, the Cloudflare token and the site password are in `.env.production.local` (git-ignored).
 
 ```bash
+pnpm install && pnpm deploy:prod               # make or update the stack (bucket, CloudFront, domain)
 .venv/bin/ego-rerun preview all                # check it locally first
 .venv/bin/ego-rerun publish all                # web build of every clip, then upload them as episodes
 ```
 
-Needs AWS credentials for the control account in the shell. `publish`:
+`pnpm remove:prod` deletes the stack. `publish` signs in with the keys in `.env.production.local` and finds the bucket and CloudFront ID in `.sst/outputs.json`, which the deploy writes. It:
 - builds a smaller copy of each clip (`ego-rerun web`): re-encoded video, half-size depth images, lighter hand surfaces;
 - uploads each to `episodes/<clip>.rrd` and adds or replaces its entry in `episodes.json` (other episodes stay);
 - uploads the web viewer from the installed Rerun to `rerun-<version>/`, so the viewer always matches the files;

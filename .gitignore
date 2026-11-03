@@ -3,3 +3,11 @@ __pycache__/
 out/
 *.rrd
 .DS_Store
+
+# Local env files (keys)
+.env
+.env.*.local
+
+# SST
+node_modules/
+.sst/

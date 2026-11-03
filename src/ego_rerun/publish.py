@@ -3,7 +3,8 @@ lists every episode in episodes.json and opens one at a time; publishing clips a
 
 `preview` lays the same site out locally and serves it, so it can be checked before publishing.
 
-`publish` uses whatever AWS credentials the shell has (they must reach the control account). Uploads:
+`publish` signs in with the keys in .env.production.local and uploads into the bucket the SST stack made
+(`pnpm deploy:prod` writes its name and the CloudFront ID to .sst/outputs.json). Uploads:
 - episodes/<clip>.rrd (gzip), with its uncompressed size for the loading bar
 - episodes.json, the list of episodes (never cached)
 - rerun-<version>/re_viewer.js and re_viewer_bg.wasm (gzip), copied from the installed Rerun so the viewer
@@ -14,6 +15,7 @@ then clears the CloudFront cache.
 import gzip
 import http.server
 import json
+import os
 import shutil
 import socket
 import subprocess
@@ -27,16 +29,33 @@ from pathlib import Path
 import rerun as rr
 
 ROOT = Path(__file__).resolve().parents[2]
-BUCKET = "zygot-sample-site-028607042266"
-DISTRIBUTION = "E26PQBGAX4M5P6"
 SITE = "https://sample.zygot.ai"
-ACCOUNT = "028607042266"
 VIEWER = f"rerun-{rr.__version__}"
 PREVIEW_PORT = 4200
 
 
+def site_env() -> dict[str, str]:
+    """The keys in .env.production.local (KEY=VALUE lines)."""
+    path = ROOT / ".env.production.local"
+    if not path.exists():
+        raise SystemExit(f"{path.name} is missing: it holds the sample site's AWS keys")
+    pairs = (line.split("=", 1) for line in path.read_text().splitlines() if "=" in line and not line.startswith("#"))
+    return {k.strip(): v.strip() for k, v in pairs}
+
+
+def stack() -> dict[str, str]:
+    """The SST stack's outputs: bucket, distribution, url."""
+    path = ROOT / ".sst" / "outputs.json"
+    if not path.exists():
+        raise SystemExit("no .sst/outputs.json: deploy the stack first (pnpm deploy:prod)")
+    return json.loads(path.read_text())
+
+
 def aws(*args: str) -> str:
-    return subprocess.run(["aws", *args], check=True, capture_output=True, text=True).stdout
+    # only the site's keys: no shell profile or session
+    env = {k: v for k, v in os.environ.items() if k not in ("AWS_PROFILE", "AWS_SESSION_TOKEN")}
+    env.update({k: v for k, v in site_env().items() if k.startswith("AWS_")})
+    return subprocess.run(["aws", *args], check=True, capture_output=True, text=True, env=env).stdout
 
 
 def viewer_files(dest: Path) -> None:
@@ -94,8 +113,9 @@ def preview(clips: list[tuple[str, Path, str]]) -> None:
     http.server.ThreadingHTTPServer(("127.0.0.1", PREVIEW_PORT), handler).serve_forever()
 
 
-def upload(path: Path, key: str, content_type: str, cache: str, gzipped: bool = False, size: int | None = None):
-    args = ["s3", "cp", str(path), f"s3://{BUCKET}/{key}", "--content-type", content_type, "--cache-control", cache]
+def upload(bucket: str, path: Path, key: str, content_type: str, cache: str, gzipped: bool = False,
+           size: int | None = None):
+    args = ["s3", "cp", str(path), f"s3://{bucket}/{key}", "--content-type", content_type, "--cache-control", cache]
     if gzipped:
         args += ["--content-encoding", "gzip"]
     if size is not None:
@@ -105,12 +125,15 @@ def upload(path: Path, key: str, content_type: str, cache: str, gzipped: bool = 
 
 
 def publish(clips: list[tuple[str, Path, str]]) -> None:
+    expected = site_env()["AWS_ACCOUNT_ID"]
     account = json.loads(aws("sts", "get-caller-identity"))["Account"]
-    if account != ACCOUNT:
-        raise SystemExit(f"AWS credentials are for account {account}; the site lives in {ACCOUNT}")
+    if account != expected:
+        raise SystemExit(f"AWS keys are for account {account}; the site lives in {expected}")
+    out = stack()
+    bucket = out["bucket"]
 
     try:
-        episodes = json.loads(aws("s3", "cp", f"s3://{BUCKET}/episodes.json", "-"))
+        episodes = json.loads(aws("s3", "cp", f"s3://{bucket}/episodes.json", "-"))
     except subprocess.CalledProcessError:
         episodes = []
     new = [entry(n, t) for n, _, t in clips]
@@ -124,21 +147,21 @@ def publish(clips: list[tuple[str, Path, str]]) -> None:
         (tmp / "index.html").write_text(page())
         (tmp / "episodes.json").write_text(json.dumps(episodes, indent=2))
 
-        print(f"uploading to s3://{BUCKET}")
-        upload(tmp / "re_viewer.js", f"{VIEWER}/re_viewer.js", "application/javascript", "public,max-age=31536000,immutable")
-        upload(tmp / "re_viewer_bg.wasm.gz", f"{VIEWER}/re_viewer_bg.wasm", "application/wasm",
+        print(f"uploading to s3://{bucket}")
+        upload(bucket, tmp / "re_viewer.js", f"{VIEWER}/re_viewer.js", "application/javascript", "public,max-age=31536000,immutable")
+        upload(bucket, tmp / "re_viewer_bg.wasm.gz", f"{VIEWER}/re_viewer_bg.wasm", "application/wasm",
                "public,max-age=31536000,immutable", gzipped=True, size=len(raw))
-        upload(tmp / "favicon.ico", "favicon.ico", "image/x-icon", "public,max-age=86400")
-        upload(tmp / "apple-touch-icon.png", "apple-touch-icon.png", "image/png", "public,max-age=86400")
+        upload(bucket, tmp / "favicon.ico", "favicon.ico", "image/x-icon", "public,max-age=86400")
+        upload(bucket, tmp / "apple-touch-icon.png", "apple-touch-icon.png", "image/png", "public,max-age=86400")
         for (_, rrd, _), e in zip(clips, new):
             with rrd.open("rb") as src, gzip.open(tmp / "episode.rrd.gz", "wb", compresslevel=6) as dst:
                 shutil.copyfileobj(src, dst)
-            upload(tmp / "episode.rrd.gz", e["file"], "application/octet-stream", "private,max-age=3600", gzipped=True,
+            upload(bucket, tmp / "episode.rrd.gz", e["file"], "application/octet-stream", "private,max-age=3600", gzipped=True,
                    size=rrd.stat().st_size)
-        upload(tmp / "episodes.json", "episodes.json", "application/json", "no-cache")
-        upload(tmp / "index.html", "index.html", "text/html;charset=utf-8", "no-cache")
+        upload(bucket, tmp / "episodes.json", "episodes.json", "application/json", "no-cache")
+        upload(bucket, tmp / "index.html", "index.html", "text/html;charset=utf-8", "no-cache")
 
-    aws("cloudfront", "create-invalidation", "--distribution-id", DISTRIBUTION,
+    aws("cloudfront", "create-invalidation", "--distribution-id", out["distribution"],
         "--paths", "/", "/index.html", "/episodes.json", *[f"/{e['file']}" for e in new])
     print(f"published {', '.join(t for _, _, t in clips)} (viewer {rr.__version__}); "
           f"{len(episodes)} episode{'s' if len(episodes) != 1 else ''} on {SITE}")
