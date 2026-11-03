@@ -67,8 +67,8 @@ def log(clip: Clip) -> dict | None:
               "placed; the frames between follow the camera's motion sensor" if "keyframe_step" in report
               else report["frames_solved"])
     fitted = report.get("levelled_from_work_surface", {})
-    level = (f"levelled from the {clip.surface if fitted.get('surface_mask') else 'work surface'} fitted in the depth "
-             "(this GoPro clip's own gravity reading came out tilted)" if fitted else "levelled to gravity from the accelerometer")
+    level = (f"levelled from the {clip.surface if fitted.get('surface_mask') else 'work surface'} fitted in the depth"
+             if fitted else "levelled to gravity from the accelerometer")
     sensor_note = ("\n\nThe GoPro's own orientation track drifts and isn't tied to gravity, so the comparison with it "
                    "mostly measures that track, not the path." if "sensor_comparison_note" in report else "")
     if "path_caveat" in clip.notes:
@@ -96,7 +96,7 @@ Structure from motion (COLMAP, SIFT) with the camera's own lens held fixed; scal
 | Rotation vs the camera's sensor | median {rot['median']}°, 95th percentile {rot['p95']}°, max {rot['max']}° |
 | Head height above the {clip.surface} | {report['head_height_above_table_m']} m |
 
-**World frame:** metres, z up, origin on the {clip.surface} under the head, x = mean looking direction.
+**World frame:** metres, z up, origin on the {clip.surface}'s plane straight below the head, x = mean looking direction.
 **Camera frame:** x right, y down, z forward (OpenCV).{sensor_note}
 """)
     agree = "" if sensor_note else f", {rot['median']}° from the camera's sensor"

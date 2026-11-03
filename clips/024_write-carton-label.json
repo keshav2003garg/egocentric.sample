@@ -2,7 +2,7 @@
   "title": "Write carton label",
   "setting": "Footwear factory",
   "capture_date": "2026-10-19",
-  "path_caveat": "This clip's camera path is the least certain of the set. Between keyframes it follows the GoPro's own orientation track, which drifts in this clip, and the world's level is taken from the carton face, so the in-between frames and the level can be off by several degrees.",
+  "path_caveat": "This clip's camera path is the least certain of the set: the world's level is taken from the carton face in the depth, not from gravity, and can be off by a few degrees.",
   "tip_on_wording": true,
   "surface": "carton face"
 }

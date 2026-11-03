@@ -7,15 +7,28 @@ from ego_rerun.clip import FPS, Clip, log_view, note
 from ego_rerun.layers.contact import detailed, hand_parts, tool_states
 
 FILES = ("action_steps.parquet", "task.json")
-STEADY_FRAMES = 10  # the hands part of the "Now" panel shows a change once it has lasted 0.2 s
+STEADY_FRAMES = 10  # the hands part of the "Now" panel: a state shorter than 0.2 s is a blip...
+PASSING_FRAMES = 5  # ...unless it sits between two different states and lasts this long (a let-go between two holds)
 
 
 def settle(values: list) -> list:
-    """A value shown only once it has lasted STEADY_FRAMES (or runs to the clip's end); until then the last one stays."""
-    shown = values[:1]
-    for k in range(1, len(values)):
-        lasts = all(v == values[k] for v in values[k:k + STEADY_FRAMES]) or k + STEADY_FRAMES > len(values)
-        shown.append(values[k] if values[k] != shown[-1] and lasts else shown[-1])
+    """Short states between two steady ones are smoothed away: where the line comes back to the same state they are a
+    blip and the steady state stays; where it moves on to another state and they last PASSING_FRAMES, the longest of
+    them is shown once in between (holding A, let go, touching B), so the change is never hidden."""
+    edges = [0] + [k for k in range(1, len(values)) if values[k] != values[k - 1]] + [len(values)]
+    runs = list(zip(edges[:-1], edges[1:]))
+    steady = [i for i, (a, b) in enumerate(runs) if i == 0 or b - a >= STEADY_FRAMES or b == len(values)]
+    shown = list(values)
+    for i, j in zip(steady, steady[1:]):
+        if j == i + 1:
+            continue
+        a, b = runs[i + 1][0], runs[j][0]
+        before, after = values[runs[i][0]], values[runs[j][0]]
+        if before == after or b - a < PASSING_FRAMES:
+            shown[a:b] = [before] * (b - a)
+        else:
+            longest = max(runs[i + 1:j], key=lambda r: r[1] - r[0])
+            shown[a:b] = [values[longest[0]]] * (b - a)
     return shown
 
 
@@ -47,8 +60,8 @@ def log(clip: Clip) -> dict | None:
         rr.log("notes/now_step", rr.TextDocument(
             f"#### Step {int(s.step_id) + 1} of {len(main)} · {s['name'][0].upper()}{s['name'][1:]}\n{s['description']}\n",
             media_type=rr.MediaType.MARKDOWN))
-    # The hands: the same lines every frame (nothing reflows), and a change shown only once it has lasted
-    # STEADY_FRAMES (the data is already cleaned of blips; this keeps the panel calm where two parts change close together)
+    # The hands: the same lines every frame (nothing reflows), with short states smoothed as in settle() (the data is
+    # already cleaned of blips; this keeps the panel calm where two parts change close together)
     contact = pd.read_parquet(clip.dir / "contact.parquet") if clip.has("contact.parquet") else None
     tools = tool_states(clip)
     by_hand = {h: contact[contact["hand"] == h].set_index("frame") for h in ("left", "right")} if contact is not None else {}

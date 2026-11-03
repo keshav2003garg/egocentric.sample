@@ -150,18 +150,24 @@ def log(clip: Clip) -> dict | None:
                      clip.short(name))
 
     # Contact events as a log
-    events["words"] = events["event"].map(lambda e: EVENT_WORDS.get(e, e.replace("_", " ")))
+    words = {**EVENT_WORDS, "tool_start": "tip on", "tool_end": "tip off"} if clip.notes.get("tip_on_wording") else EVENT_WORDS
+    events["words"] = events["event"].map(lambda e: words.get(e, e.replace("_", " ")))
     events["order"] = events["words"].map(EVENT_ORDER).fillna(len(EVENT_ORDER))
     for e in events.sort_values(["frame", "order"]).itertuples():
         rr.set_time("frame", sequence=int(e.frame))
         rr.set_time("time", duration=e.frame / FPS)
         rr.log("logs/contact_events", rr.TextLog(f"{e.hand} hand · {e.words} · {clip.short(e.object)}"))
+    if events.empty:  # nothing starts or stops: say so, rather than leave the log blank
+        rr.set_time("frame", sequence=0)
+        rr.set_time("time", duration=0.0)
+        rr.log("logs/contact_events", rr.TextLog("no changes: each hand keeps the same contact for the whole clip"))
     rr.reset_time()
 
     note("notes/contact", (detailed_note if full else visible_surface_note)(clip, meta, contact))
     tools = " and ".join(clip.short(t) for t in meta.get("tool_summary", {})) if not full else "brush strokes and dips"
+    tools = f"the {tools}'s use" if tools and not full else tools
     what = "Touch, hold, fingers and grip type per hand" if full else "Touch, hold and fingers per hand"
-    return {"Contact": what + (f"; {tools}" if tools else "")}
+    return {"Contact": what + (f", and {tools}" if tools else "")}
 
 
 def plural(n, word: str) -> str:
@@ -210,17 +216,21 @@ def visible_surface_note(clip: Clip, meta: dict, contact: pd.DataFrame) -> str:
     for name, t in meta.get("tool_summary", {}).items():
         uses = ", ".join(f"{clip.short(k)} {v / FPS:.1f} s" for k, v in t["frames_in_use_by_object"].items() if v >= 5)
         use = ("tip on" if clip.notes.get("tip_on_wording") else "in use on")
-        pauses = " (this includes pauses with the tip resting on it between strokes)" if clip.notes.get("tip_on_wording") else ""
+        pauses = (" (the tip stays within about 1 cm of it while writing and while it rests between strokes, so this doesn't"
+                  " separate writing from pauses; the steps do)") if clip.notes.get("tip_on_wording") else ""
         tools.append(f"**{clip.label(name)}:** held for {t['frames_held'] / FPS:.1f} s; {use} {uses or '–'}{pauses}.")
     check = meta.get("hand_check", {})
     spot = (f"| Spot check of state and object | {check['state_and_object_correct']:.0%} right on "
             f"{check['hand_frames_scored']} hand-frames |" if check else "")
     roles = f"**In this clip:** {clip.notes['contact_roles']}\n\n" if clip.notes.get("contact_roles") else ""
+    tool = next(iter(meta.get("tool_summary", {})), None)
+    also = (f", except that the hand using the {clip.short(tool)} can also steady the object it works on; that second hold "
+            "is listed under \"Also held\"" if tool else "")
     return f"""
 ### Contact and grasp
 For each hand on every frame: what it touches, what it holds, and which fingers and the palm are in contact.
 
-**How it's found:** the 3D hand surface is measured against each object's visible surface, taken from its mask and the depth. A hand touches an object when they come within 15 mm where their outlines meet in the image, or when it is partly behind the object (holding it from below). It holds a movable object when it grips it (thumb plus another part, or any three parts touching), or carries it from below as the object moves with the wrist. When the fingers are on a lace or tool, that is named rather than what it lies on. A smoothing step removes flicker. A hand holds one object at a time, except that a hand using a tool can also steady the object it works on ("holding marker and shoe"); that second hold is listed under "Also held". There are no 3D object models in this clip, so contact is judged against the surface the camera sees next to the fingers.
+**How it's found:** the 3D hand surface is measured against each object's visible surface, taken from its mask and the depth. A hand touches an object when they come within 15 mm where their outlines meet in the image, or when it is partly behind the object (holding it from below). It holds a movable object when it grips it (thumb plus another part, or any three parts touching), or carries it from below as the object moves with the wrist. When the fingers are on a lace or tool, that is named rather than what it lies on. A smoothing step removes flicker. A hand holds one object at a time{also}. There are no 3D object models in this clip, so contact is judged against the surface the camera sees next to the fingers.
 
 {roles}**Out of view:** where the 3D hand isn't drawn (out of the picture, or too far into its edge), contact isn't judged and the hand shows as out of view. The 3D hand is also left undrawn where it lands off the real hand (see the Hands note); contact there is still judged from the hand data, so those frames aren't counted as out of view. A hold carries on through such a gap, or while a tool is hidden in the fist, when the same object is held on both sides and isn't seen apart from the hand.
 
@@ -249,6 +259,7 @@ def tab(clip: Clip):
     ]
     if clip.has("tool_contact.parquet"):
         name = ("Brush: 0 idle · 1 approach · 2 dip · 3 painting" if detailed(clip)
+                else "Tool: 0 not held · 1 held · 2 tip on" if clip.notes.get("tip_on_wording")
                 else "Tool: 0 not held · 1 held · 2 in use")
         views.append(rrb.TimeSeriesView(origin="plots/contact/tool", name=name))
     # the events log and the note side by side under the plots, so the log gets a full half-height

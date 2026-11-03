@@ -19,7 +19,7 @@ ON_SCENE_MIN = 0.4  # a 3D hand with less of its surface than this on the hand o
 ON_HAND_MIN = 0.35  # ...nor one clearly in view (outline >= BIG_HAND_PX) with less than this on its own outline
 BIG_HAND_PX = 3000  # half-res px
 OFF_SCENE_PAD = 2  # ...nor the frames this close to it
-MIN_DRAWN_RUN = 6  # frames: a shorter drawn run between hidden frames isn't drawn
+MIN_DRAWN_RUN = 10  # frames: a shorter drawn run between hidden frames isn't drawn
 SMOOTH_HALF = 4  # hands.parquet is smoothed over 9 frames, so a bad frame pulls up to 4 neighbours off with it
 
 FILES = ("hands.parquet", "hands_meta.json")
@@ -185,7 +185,9 @@ def log(clip: Clip) -> dict | None:
         step = np.diff(frames)
         speed = np.r_[np.nan, np.where(step == 1, np.linalg.norm(np.diff(wrist, axis=0), axis=1) * FPS * 100, np.nan)]
         label = f"{hand} hand"
-        plot(f"plots/hands/grip_cm/{hand}", frames, t["aperture_thumb_index_m"] * 100, colour, label)
+        # re-placed frames copy one frame's finger pose, so their grip opening isn't a measurement
+        grip = np.where(t["source"].to_numpy() == "refit", np.nan, t["aperture_thumb_index_m"].to_numpy() * 100)
+        plot(f"plots/hands/grip_cm/{hand}", frames, grip, colour, label)
         plot(f"plots/hands/wrist_height_cm/{hand}", frames, wrist[:, 2] * 100, colour, label)
         plot(f"plots/hands/wrist_speed_cm_s/{hand}", frames, speed, colour, label)
         plot(f"plots/hands/check_depth_mm/{hand}", frames, t["qc_depth_resid_mm"], colour, label)
@@ -218,6 +220,7 @@ NVIDIA EgoHand-v1 on the fisheye video, with hand boxes from the SAM 3.1 masks. 
 {table}
 
 **On the video:** coloured dots are visible joints; grey dots are joints hidden behind an object or the other hand.{hidden_note}
+
 **Grip:** thumb-tip to index-tip distance.
 """)
     return {"Hands": "25 joints and surface per hand, in metres"}

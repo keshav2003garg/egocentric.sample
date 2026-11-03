@@ -1,6 +1,6 @@
 {
   "title": "Press sole onto shoe",
   "setting": "Footwear factory",
-  "contact_roles": "the left grip doesn't change at about 3 s; only the surface under the fingers turns from sole to shoe upper as the shoe rolls, so the hold passes from sole to shoe in one \"hold moves to\" event.",
+  "contact_roles": "the left hand holds the sole and the shoe together, thumb on the heel's upper and fingers on the sole. At about 3 s, as the sole goes onto the shoe, what it holds is named as the shoe instead (one \"hold moves to\" event); the grip itself doesn't change until the shoe is rolled at about 3.2–3.7 s. There the Fingers plot drops to about one finger: the fingers still on the sole sit 2–3 cm off it in the 3D fit, just outside the touch distance.",
   "surface": "ledge"
 }

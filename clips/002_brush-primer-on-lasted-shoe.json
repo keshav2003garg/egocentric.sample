@@ -10,5 +10,5 @@
     "shoe": "Shoe"
   },
   "capture_date": "2026-10-20",
-  "refit_note": "while the right hand wraps the brush (2.4–8.8 s) its fingers are mostly hidden by the handle and the hand model misreads the grip, so there the 3D hand is the grip from a clearly seen frame (0.8 s) placed on the brush handle's 3D axis, turned and slid to match the hand's outline and depth. Its finger pose is that frame's, not measured on each frame."
+  "refit_note": "while the right hand wraps the brush (2.4–8.4 s) its fingers are mostly hidden by the handle and the hand model misreads the grip. There the 3D hand is the grip from one clearly seen frame (0.8 s), put back on the brush handle each frame with the wrist toward the forearm, placed to match the hand's outline and depth. It shows where the hand is and which way it points; the finger pose is that one frame's, not measured, so the Grip plot leaves these frames out and the finger contacts there are approximate. The outline overlap in the table counts measured frames only."
 }
