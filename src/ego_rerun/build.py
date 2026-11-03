@@ -85,7 +85,7 @@ def blueprint(clip: Clip, tabs: list, has_now: bool):
 def web_video(source: Path, out: Path) -> Path:
     """Smaller H.264 copy for the hosted viewer: same frames and timing, no B-frames, keyframe every second."""
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(source), "-an", "-c:v", "libx264", "-preset", "slow",
-                    "-crf", "30", "-pix_fmt", "yuv420p", "-bf", "0", "-g", "50", "-movflags", "+faststart", str(out)],
+                    "-crf", "27", "-pix_fmt", "yuv420p", "-bf", "0", "-g", "50", "-movflags", "+faststart", str(out)],
                    check=True)
     return out
 

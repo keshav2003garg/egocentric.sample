@@ -57,7 +57,7 @@ def log(clip: Clip) -> dict | None:
     if not clip.has(*FILES):
         return None
     depth = np.load(clip.dir / "depth.npz")["depth_mm"]
-    size, quality = ((depth.shape[2] // 2, depth.shape[1] // 2), 70) if clip.web else (None, 88)
+    size, quality = ((depth.shape[2] // 2, depth.shape[1] // 2), 80) if clip.web else (None, 88)
     blobs = [cv2.imencode(".jpg", colourise(cv2.resize(d, size, interpolation=cv2.INTER_NEAREST) if size else d),
                           [cv2.IMWRITE_JPEG_QUALITY, quality])[1].tobytes() for d in depth]
     rr.send_columns("depth", indexes=times(np.arange(len(depth))),

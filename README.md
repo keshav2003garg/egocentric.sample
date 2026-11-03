@@ -71,7 +71,7 @@ pnpm install && pnpm deploy:prod               # make or update the stack (bucke
 ```
 
 `pnpm remove:prod` deletes the stack. `publish` signs in with the keys in `.env.production.local` and finds the bucket and CloudFront ID in `.sst/outputs.json`, which the deploy writes. It:
-- builds a smaller copy of each clip (`ego-rerun web`): re-encoded video, half-size depth images and masks, lighter hand surfaces;
+- builds a smaller copy of each clip (`ego-rerun web`): re-encoded video, half-size depth images, lighter hand surfaces;
 - uploads each to `episodes/<clip>.rrd` and adds or replaces its entry in `episodes.json` (other episodes stay);
 - uploads the web viewer from the installed Rerun to `rerun-<version>/`, so the viewer always matches the files;
 - uploads `index.html` from `site/index.html`, then clears the CloudFront cache.

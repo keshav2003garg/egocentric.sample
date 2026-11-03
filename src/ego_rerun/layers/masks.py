@@ -14,8 +14,6 @@ def log(clip: Clip) -> dict | None:
         return None
     z = np.load(clip.dir / "masks.npz")
     labels, order = z["labels"], [str(n) for n in z["names"]]
-    if clip.web:
-        labels = labels[:, ::2, ::2]  # half the grid: a quarter of the memory in the browser
     table = pd.read_parquet(clip.dir / "masks.parquet")
     scale = clip.lens["width"] / labels.shape[2]
 
