@@ -8,8 +8,8 @@
     "machine": "Toe-lasting machine"
   },
   "capture_date": "2026-10-24",
-  "masks_caveat": "from about 7.2 s another worker's hand appears at the top of the image; it is not outlined, and neither is the wearer's right hand there.",
-  "contact_roles": "both hands hold the shoe sole-up in the machine through the press, then put it on the conveyor beside its pair. In the last second \"shoe\" in the contact also means the pair's other shoe (squared up at 7.8–8.0 s) and then another shoe the left hand picks up; only the worked shoe is outlined. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data).",
+  "masks_caveat": "from about 8.8 s another worker's hand appears at the top of the image; it is not outlined, and neither is the wearer's right hand there. During the first 0.4 s the shoe at the machine is the previous one and isn't outlined.",
+  "contact_roles": "the left hand takes the shoe off the conveyor, then both hands hold it sole-up in the machine through the press and put it on the conveyor beside its pair. At the end \"shoe\" in the contact also means the pair's other shoe, squared up beside it at 9.4–9.6 s; only the worked shoe is outlined. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data).",
   "surface": "work surface",
   "depth_caveat": "the error here is about twice the other clips': much of the view is the toe-lasting machine right in front of the camera (dark, shiny metal), and the worker turns away to the conveyor, so there are fewer steady points to check and align the depth against."
 }
