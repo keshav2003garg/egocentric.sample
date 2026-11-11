@@ -10,5 +10,5 @@
   },
   "capture_date": "2026-10-27",
   "contact_roles": "the left hand handles the navy upper pieces; the right hand lowers and lifts the screen and pulls the squeegee across it. The stack of blank pieces isn't a tracked object, so a hand on it reads as free. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data).",
-  "masks_caveat": "while the screen is down over it (about 2.4–5.1 s) the upper piece being printed is not outlined; the stack of blank pieces on the left is not outlined either. At the start (0–0.26 s) the print being put on the finished stack is the last cycle's and isn't outlined; the outline is on the blank piece beside the board. The printing screen is outlined by its wooden frame only, not the mesh."
+  "masks_caveat": "while the screen is down over it (about 1.9–4.6 s) the upper piece being printed is not outlined; the stack of blank pieces on the left is not outlined either. The printing screen is outlined by its wooden frame only, not the mesh."
 }
