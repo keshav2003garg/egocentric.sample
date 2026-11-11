@@ -1,0 +1,12 @@
+{
+  "title": "Last shoe upper with pincers",
+  "setting": "Footwear factory, seated at a curved conveyor",
+  "objects": {
+    "left_hand": "Left hand",
+    "right_hand": "Right hand",
+    "shoe": "Shoe",
+    "pincers": "Lasting pincers"
+  },
+  "capture_date": "2026-10-24",
+  "contact_roles": "the left hand holds the shoe insole-up in the air while the right hand pulls and taps the upper's edge with the lasting pincers. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review)."
+}

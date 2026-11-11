@@ -1,0 +1,13 @@
+{
+  "title": "Stuff shoe with newspaper",
+  "setting": "Footwear factory, long table of black sneakers",
+  "objects": {
+    "left_hand": "Left hand",
+    "right_hand": "Right hand",
+    "shoe": "Shoe",
+    "newspaper": "Newspaper"
+  },
+  "capture_date": "2026-10-19",
+  "masks_caveat": "the newspaper outline covers the pad on the table; the sheet torn from it and the crumpled ball are mostly not outlined.",
+  "contact_roles": "the hands tear a sheet from the pad, crumple it and wrap it into a ball, then push it into the shoe while the left hand steadies the shoe. Most of this clip's contact (64% of hand-frames) was set by a reviewer watching the video, because the torn sheet and the ball have no outline (contact.parquet marks those frames labelled_by = review)."
+}

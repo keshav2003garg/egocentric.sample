@@ -1,0 +1,15 @@
+{
+  "title": "Position cutting die and cut leather",
+  "setting": "Footwear factory, standing at a clicker press",
+  "surface": "cutting board",
+  "objects": {
+    "left_hand": "Left hand",
+    "right_hand": "Right hand",
+    "die": "Cutting die",
+    "handle": "Press handle",
+    "cutting_board": "Cutting board"
+  },
+  "capture_date": "2026-10-27",
+  "masks_caveat": "the leather strip is not outlined; the die's outline is lost under the press head during the cut.",
+  "contact_roles": "the right hand sets the die on the leather strip; the left hand swings the press and pulls its handle. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review)."
+}

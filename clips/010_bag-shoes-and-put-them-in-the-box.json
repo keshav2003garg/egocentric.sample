@@ -1,0 +1,14 @@
+{
+  "title": "Bag shoes and put them in the box",
+  "setting": "Footwear factory, packing table",
+  "objects": {
+    "left_hand": "Left hand",
+    "right_hand": "Right hand",
+    "shoes": "Shoe pair",
+    "bag": "Plastic bag",
+    "box": "Shoe box"
+  },
+  "capture_date": "2026-10-19",
+  "masks_caveat": "the shoe-pair outline covers one shoe of the pair; the left hand isn't outlined from 7.78 to 8.08 s, where the bag hides it.",
+  "contact_roles": "both hands set the pair down and turn it, pull the bag over it and lift it into the box. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review)."
+}

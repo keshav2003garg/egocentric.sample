@@ -6,9 +6,17 @@ Builds Rerun viewer files for the ego sample clips from their finished layer fil
 
 | Clip | Title | Notes |
 |---|---|---|
+| 001_stuff-shoe-with-newspaper | Stuff shoe with newspaper | contact mostly set by review (paper ball not outlined) |
 | 002_brush-primer-on-lasted-shoe | Brush primer on lasted shoe | brush tool |
+| 003_last-shoe-upper-with-pincers | Last shoe upper with pincers | lasting pincers tool |
 | 004_paint-shoe-sole-edge | Paint shoe sole edge | brush tool; richer contact data (see Layers) |
 | 005_press-sole-onto-shoe | Press sole onto shoe | |
+| 006_apply-solution-along-sole-seam-with-syringe | Apply solution along sole seam | syringe tool |
+| 007_screen-print-shoe-upper | Screen print shoe upper | squeegee tool |
+| 008_toe-last-shoe-on-machine | Toe last shoe on machine | standing at a machine |
+| 009_die-cut-sheet-on-clicker-press | Die-cut sheet on clicker press | cutting die tool |
+| 010_bag-shoes-and-put-them-in-the-box | Bag shoes and put them in the box | GoPro |
+| 014_position-cutting-die-and-cut-leather | Position cutting die and cut leather | cutting die tool |
 | 018_insert-insole-into-shoe | Insert insole into shoe | |
 | 019_lace-shoe | Lace shoe | 34 s, the longest |
 | 020_trace-sole-line-on-lasted-shoe | Trace sole line on lasted shoe | marker tool |
