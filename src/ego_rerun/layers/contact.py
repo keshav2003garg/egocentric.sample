@@ -165,7 +165,7 @@ def log(clip: Clip) -> dict | None:
 
     note("notes/contact", (detailed_note if full else visible_surface_note)(clip, meta, contact))
     tools = " and ".join(clip.short(t) for t in meta.get("tool_summary", {})) if not full else "brush strokes and dips"
-    tools = f"the {tools}'s use" if tools and not full else tools
+    tools = f"the {tools}{chr(39) if tools.endswith('s') else chr(39) + 's'} use" if tools and not full else tools
     what = "Touch, hold, fingers and grip type per hand" if full else "Touch, hold and fingers per hand"
     return {"Contact": what + (f", and {tools}" if tools else "")}
 

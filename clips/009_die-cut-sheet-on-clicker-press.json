@@ -10,5 +10,5 @@
     "handle": "Press handle"
   },
   "capture_date": "2026-10-27",
-  "contact_roles": "the right hand places and lifts the steel cutting die; the left hand pulls the press handle for the cut and takes the cut piece away. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review)."
+  "contact_roles": "the right hand places and lifts the steel cutting die; the left hand pulls the press handle for the cut and takes the cut piece away. The press head is not one of the outlined objects, so a hand swinging or pushing it reads as free. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review)."
 }

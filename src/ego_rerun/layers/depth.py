@@ -77,12 +77,13 @@ def log(clip: Clip) -> dict | None:
 |---|---|
 {bands}
 """ if s else ""
+    caveat = f"\n**In this clip:** {clip.notes['depth_caveat']}\n" if clip.notes.get("depth_caveat") else ""
     note("notes/depth", f"""
 ### Depth
 {s.get('model', 'Metric depth')}. Millimetres along the camera's forward axis, on the video's own fisheye pixels at {depth.shape[2]}×{depth.shape[1]}.{s.get('extra', '')}
 
 **Colours:** red = 20 cm or nearer, blue = 80 cm or farther, black = no depth.
-{checks}""")
+{checks}{caveat}""")
     return {"Depth": f"Metric depth per frame, {s['error_vs_sfm_points_pct']}% median error" if s else "Metric depth per frame"}
 
 

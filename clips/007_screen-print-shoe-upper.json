@@ -9,5 +9,6 @@
     "squeegee": "Squeegee"
   },
   "capture_date": "2026-10-27",
-  "contact_roles": "the left hand handles the navy upper pieces; the right hand lowers and lifts the screen and pulls the squeegee across it. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review)."
+  "contact_roles": "the left hand handles the navy upper pieces; the right hand lowers and lifts the screen and pulls the squeegee across it. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review).",
+  "masks_caveat": "while the screen is down over it (about 2.4–5.1 s) the upper piece being printed is not outlined; the stack of blank pieces on the left is not outlined either."
 }
