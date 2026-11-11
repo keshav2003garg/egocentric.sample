@@ -98,11 +98,12 @@ def log(clip: Clip) -> dict | None:
                      for _, s in main.iterrows())
     repeats = {k: v for k, v in task.get("counts", {}).items() if v > 1}
     counts = " **Counts:** " + ", ".join(f"{k.replace('_', ' ')} ×{v}" for k, v in repeats.items()) + "." if repeats else ""
-    finer = (f"{len(sub)} finer sub-step{'s mark' if len(sub) != 1 else ' marks'} repeated actions within the steps."
+    finer = (f"{len(sub)} sub-step{'s mark' if len(sub) != 1 else ' marks'} each bout of tool use within the steps."
              if len(sub) else "")
     lo, hi = (int(v) for v in pd.concat([main, sub])["boundary_uncertainty_frames"].agg(["min", "max"]))
     spread = f"±{lo}" if lo == hi else f"±{lo}–{hi}"
     spread_s = f"{lo / FPS:.2f}" if lo == hi else f"{lo / FPS:.2f}–{hi / FPS:.2f}"
+    tool_words = ", tool" if clip.has("tool_contact.parquet") else ""
     note("notes/steps", f"""
 ### Action steps
 **Instruction:** {task['instruction']}
@@ -117,10 +118,10 @@ def log(clip: Clip) -> dict | None:
 
 **Outcome:** {task.get('outcome', '–')}.
 
-Step start and end frames come from the contact, tool and 3D hand data where they show the change, otherwise from keyframes; each is accurate to {spread} frames ({spread_s} s). Step names and descriptions are written from keyframes and checked against those timings.
+Step start and end times come from the contact{tool_words} and 3D hand data where they show the change, otherwise from frames checked by eye; each is accurate to within {hi / FPS:.2f} s. Step names and descriptions are written from frames of the video and checked against those timings.
 """)
     and_sub = f" and {len(sub)} sub-step{'s' if len(sub) != 1 else ''}" if len(sub) else ""
-    return {"Action steps": f"{len(main)} timed steps{and_sub} with descriptions"}
+    return {"Action steps": f"{len(main)} timed steps with descriptions{and_sub}"}
 
 
 def row_of(table: pd.DataFrame, frame: int):

@@ -10,6 +10,6 @@
     "cutting_board": "Cutting board"
   },
   "capture_date": "2026-10-27",
-  "masks_caveat": "the leather strip is not outlined; the die's outline is lost under the press head during the cut.",
-  "contact_roles": "the right hand sets the die on the leather strip; the left hand swings the press and pulls its handle. The press head is not one of the outlined objects, so a hand swinging or pushing it reads as free. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review)."
+  "masks_caveat": "the leather strip is not outlined; the die's outline is lost under the press head during the cut. The press handle (the red ball on the lever) is outlined only where it was found reliably: 0–0.3 s and 7.0–8.9 s.",
+  "contact_roles": "the right hand sets the die on the leather strip; the left hand swings the press and pulls its handle. The press head is not one of the outlined objects, so a hand swinging or pushing it reads as free. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data)."
 }

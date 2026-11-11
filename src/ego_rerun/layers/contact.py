@@ -19,7 +19,7 @@ STATE_LEVEL = {"none": 0, "touching": 1, "holding": 2}
 TOOL_LEVEL = {"idle": 0, "approach": 1, "dip": 2, "stroke": 3}
 TOOL_WORDS = {"idle": "not in use", "approach": "approaching", "dip": "dipping", "stroke": "painting"}
 # Other clips' tools
-USE_LEVEL = {"not held": 0, "held": 1, "resting": 1, "in use": 2}
+USE_LEVEL = {"not held": 0, "resting": 0, "held": 1, "in use": 2}
 CONTACT_DOT = [255, 70, 70]
 FINGER_TIPS = {0: 4, 1: 9}  # finger_contact part -> fingertip in the 25 hand joints: thumb, index
 STEADY_FRAMES = 10  # a fingertip dot appears or goes only after 0.2 s
@@ -62,7 +62,7 @@ def hand_parts(clip: Clip, row) -> tuple[str, str]:
     if row.state == "holding":
         also = getattr(row, "also_holding", "none")
         what = f"holding {clip.short(row.held_object)}" + (f" and {clip.short(also)}" if also not in ("none", None) else "")
-        if not getattr(row, "hand_visible", True):
+        if not getattr(row, "hand_visible", True) and getattr(row, "labelled_by", "auto") != "review":
             return f"{what} (hand at the frame edge or out of view)", ""
         return what, grip_words(row)
     if row.state == "touching":
@@ -150,13 +150,17 @@ def log(clip: Clip) -> dict | None:
                      clip.short(name))
 
     # Contact events as a log
+    tool_table = pd.read_parquet(clip.dir / "tool_contact.parquet") if clip.has("tool_contact.parquet") else None
+    tool_names = set(tool_table["tool"]) if tool_table is not None and "tool" in tool_table else set()
     words = {**EVENT_WORDS, "tool_start": "tip on", "tool_end": "tip off"} if clip.notes.get("tip_on_wording") else EVENT_WORDS
     events["words"] = events["event"].map(lambda e: words.get(e, e.replace("_", " ")))
     events["order"] = events["words"].map(EVENT_ORDER).fillna(len(EVENT_ORDER))
     for e in events.sort_values(["frame", "order"]).itertuples():
         rr.set_time("frame", sequence=int(e.frame))
         rr.set_time("time", duration=e.frame / FPS)
-        rr.log("logs/contact_events", rr.TextLog(f"{e.hand} hand · {e.words} · {clip.short(e.object)}"))
+        who = f"{e.hand} hand" if e.hand in ("left", "right") else (
+            next((clip.short(o) for o in clip.objects if o in tool_names), "tool"))
+        rr.log("logs/contact_events", rr.TextLog(f"{who} · {e.words} · {clip.short(e.object)}"))
     if events.empty:  # nothing starts or stops: say so, rather than leave the log blank
         rr.set_time("frame", sequence=0)
         rr.set_time("time", duration=0.0)
@@ -259,8 +263,8 @@ def tab(clip: Clip):
     ]
     if clip.has("tool_contact.parquet"):
         name = ("Brush: 0 idle · 1 approach · 2 dip · 3 painting" if detailed(clip)
-                else "Tool: 0 not held · 1 held · 2 tip on" if clip.notes.get("tip_on_wording")
-                else "Tool: 0 not held · 1 held · 2 in use")
+                else "Tool: 0 not held or resting · 1 held · 2 tip on" if clip.notes.get("tip_on_wording")
+                else "Tool: 0 not held or resting · 1 held · 2 in use")
         views.append(rrb.TimeSeriesView(origin="plots/contact/tool", name=name))
     # the events log and the note side by side under the plots, so the log gets a full half-height
     below = rrb.Horizontal(log_view("logs/contact_events", "Contact events"),

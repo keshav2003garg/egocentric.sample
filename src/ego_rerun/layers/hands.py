@@ -111,8 +111,12 @@ def log(clip: Clip) -> dict | None:
         # hand half out of the picture where the fisheye corners have no depth) it lands far off, e.g. under the table
         bad = ~everything["present"].to_numpy() | everything["qc_depth_resid_mm"].isna().to_numpy()
         present = ~binary_dilation(bad, iterations=SMOOTH_HALF) if bad.any() else ~bad
+        if "fit_ok" in everything:
+            # the clip's own flag (hands.parquet fit_ok / fit_issue): drawn on exactly the frames the data marks as placed
+            # reliably, so the viewer and the data agree
+            present = everything["fit_ok"].to_numpy().astype(bool)
         # also not where the 3D hand lands clearly off the hand and objects in the picture (a pose or place gone wrong)
-        if mesh is not None:
+        elif mesh is not None:
             scene, own = on_scene(clip, mesh["vertices_world"][:, hi], hand)
             off = (scene < ON_SCENE_MIN) | (own < ON_HAND_MIN)
             present &= ~binary_dilation(off, iterations=OFF_SCENE_PAD) if off.any() else True
@@ -206,8 +210,11 @@ def log(clip: Clip) -> dict | None:
     total = len(hands) // 2
     coverage = (f"on all {total} frames" if seen["left"] == seen["right"] == total else
                 f"on {seen['left']} (left) and {seen['right']} (right) of {total} frames. On the others the hand "
-                "is out of the picture, too far into its edge to be placed against measured depth, or its 3D fit lands off "
-                "the hand in the picture, and isn't drawn")
+                + ("is out of the picture or its 3D placement isn't reliable (its distance drifts from the measured one, "
+                   "it lands under the work surface or off the hand in the picture); the data marks those frames, with "
+                   "the reason, and they aren't drawn" if "fit_ok" in hands else
+                   "is out of the picture, too far into its edge to be placed against measured depth, or its 3D fit lands "
+                   "off the hand in the picture, and isn't drawn"))
     hidden_note = (f"\n\n**Not drawn:** {clip.notes['hide_hand_note']}" if clip.notes.get("hide_hand_note") else "")
     hidden_note += f"\n\n**Re-placed:** {clip.notes['refit_note']}" if clip.notes.get("refit_note") else ""
     note("notes/hands", f"""

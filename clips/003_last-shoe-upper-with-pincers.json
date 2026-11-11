@@ -8,6 +8,7 @@
     "pincers": "Lasting pincers"
   },
   "capture_date": "2026-10-24",
-  "contact_roles": "the left hand holds the shoe insole-up in the air while the right hand pulls and taps the upper's edge with the lasting pincers. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (contact.parquet marks those frames labelled_by = review).",
-  "surface": "work surface"
+  "contact_roles": "the left hand holds the shoe insole-up in the air while the right hand pulls and taps the upper's edge with the lasting pincers. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data).",
+  "surface": "work surface",
+  "masks_caveat": "the pincers' outline is left out for 8.60–8.78 s while they swing, where it had slipped onto the background."
 }
