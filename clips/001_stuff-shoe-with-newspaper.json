@@ -5,9 +5,10 @@
     "left_hand": "Left hand",
     "right_hand": "Right hand",
     "shoe": "Shoe",
-    "newspaper": "Newspaper"
+    "newspaper": "Newspaper pad",
+    "newspaper_ball": "Newspaper (sheet and ball)"
   },
   "capture_date": "2026-10-19",
-  "masks_caveat": "the newspaper outline covers the pad on the table; the sheet torn from it and the crumpled ball are mostly not outlined. The shoe outline follows the shoe being worked on; the other shoes in the row are not outlined.",
-  "contact_roles": "the hands tear a sheet from the pad, crumple it and wrap it into a ball, then push it into the shoe while the left hand steadies the shoe. Most of this clip's contact (64%) was set by a reviewer watching the video, because the torn sheet and the ball have no outline (those frames are marked as reviewer-corrected in the data)."
+  "masks_caveat": "the newspaper pad and the paper the worker handles are outlined separately: \"Newspaper (sheet and ball)\" follows the sheet from the tear at 0.4 s through crumpling and wrapping into a ball, and the wad into the shoe until it disappears inside at about 6.1 s; while the sheet is still part of the pad, or wrapped inside the hands, its outline can be small. The shoe outline follows the shoe being worked on; the other shoes in the row are not outlined.",
+  "contact_roles": "the hands tear a sheet from the pad, crumple it and wrap it into a ball, then push it into the shoe while the left hand steadies the shoe. Much of this clip's contact was set by a reviewer watching the video, because the paper changes shape in the hands faster than the automatic cues follow (those frames are marked as reviewer-corrected in the data)."
 }
