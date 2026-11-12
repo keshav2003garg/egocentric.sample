@@ -10,5 +10,6 @@
     "handle": "Press handle"
   },
   "capture_date": "2026-10-27",
-  "contact_roles": "the right hand places and lifts the steel cutting die; the left hand pulls the press handle for the cut and takes the cut piece away; the piece cut out of the sheet counts as foam sheet while it is carried to the pile. The press head is not one of the outlined objects, so a hand swinging or pushing it reads as free. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data)."
+  "masks_caveat": "the die's outline is lost under the press head during the cut (2.3–4.1 s), and the press handle (the red knob) is outlined only while it is in view, 2.1–4.1 s. The cut piece is not outlined on its own: it is part of the foam sheet until the left hand pulls it out at 5.7 s.",
+  "contact_roles": "the right hand places the steel cutting die and later lifts it off the cut; the left hand pulls the press handle for the cut, then takes the cut piece out of the sheet and lays it on the pile (5.7–6.3 s). The piece counts as foam sheet while it is carried to the pile. The press head is not one of the outlined objects, so a hand swinging or pushing it reads as free. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data)."
 }
