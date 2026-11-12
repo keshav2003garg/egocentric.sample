@@ -9,6 +9,6 @@
     "box": "Shoe box"
   },
   "capture_date": "2026-10-19",
-  "masks_caveat": "the shoe-pair outline covers one shoe of the pair; once the pair is in the box (from about 8.0 s) the bag's outline covers it instead.",
-  "contact_roles": "both hands set the pair down and turn it, pull the bag over it and lift it into the box. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data)."
+  "masks_caveat": "both shoes of the pair are outlined together as the shoe pair until it is in the box (to about 8.3 s); while the bag is pulled over them (6.7-7.3 s) only the parts outside the bag are outlined, and in the box the bag's outline covers them. The bag isn't outlined while it is still on the stack (before 3.5 s) or once the lid is shut over it (from 8.9 s). The shoe box stays outlined as it is closed, carried and set on the stack; the box beside it, which the left hand pushes at the end, isn't outlined.",
+  "contact_roles": "both hands set the pair down and turn it, pull the bag over it, lift it into the box, close the box and carry it to the stack; the right hand then presses it into line while the left pushes the box beside it. Parts of this clip's contact were corrected by a reviewer watching the video, where the automatic cues missed it (those frames are marked as reviewer-corrected in the data)."
 }
